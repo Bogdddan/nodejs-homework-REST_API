@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const contactSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema(
+  {
   title: {
     type: String,
     required: true
@@ -27,12 +28,20 @@ const contactSchema = new mongoose.Schema({
   },
   year: {
     type: Number,
-    required: true
+    required: true,
   },
   verified: {
     type: Boolean,
     default: false,
   },
-});
+  ownerId: {
+    type: mongoose.Schema.ObjectId,
+    required: true,
+  },
+},
+{
+  timestamps: true,
+}
+);
 
 module.exports = mongoose.model("Book", contactSchema)
