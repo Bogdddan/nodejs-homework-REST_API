@@ -9,7 +9,7 @@ const userRoutes = require('./users');
 const auth = require('../middleware/auth');
 
 router.use('/auth', authRoutes);
-router.use("/contacts", contqactRoutes);
-router.use('/user', userRoutes);
+router.use("/contacts", auth, contqactRoutes);
+router.use('/user', auth, userRoutes);
 
 module.exports = router;

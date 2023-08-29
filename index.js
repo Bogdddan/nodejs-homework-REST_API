@@ -1,3 +1,5 @@
+const path = require("noode:path");
+
 const express = require("express");
 
 const routes = require("./routes");
@@ -5,6 +7,8 @@ const routes = require("./routes");
 require("./db");
 
 const app = express();
+
+app.use("/avatars", express.static(path.join(__dirname, "public")));
 
 app.use("/api", routes);
 
@@ -20,5 +24,3 @@ app.use((error, req, res, next) => {
 app.listen(8080, () => {
   console.log("Server running on port 8080");
 });
-
-// 

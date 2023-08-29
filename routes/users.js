@@ -1,7 +1,9 @@
 const express = require('express');
 
+const UserController = require('../controllers/user');
+
 const router = express.Router();
 
-router.post('/avatar', UserControllers.uploadAvatar);
+router.patch('/avatar', upload.single("avatar"), UserController.uploadAvatar);
 
 module.exports = router;
