@@ -19,7 +19,6 @@ async function uploadAvatar(req, res, next) {
     if (doc === null) {
       return res.status(404).send({ message: "User not found" });
     }
-
     res.send(doc);
   } catch (error) {
     next(error);

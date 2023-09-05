@@ -1,7 +1,10 @@
+const crypto = require("node:crypto");
+
 const bcrypt = require('bcrypt');
 const jwt = require('jwt');
 
 const User = require("../models/user");
+const sendEmail = require("../helpers/sendEmail");
 
 async function register(req, res, next) {
   const { name, email, password } = req.body;
@@ -14,10 +17,24 @@ async function register(req, res, next) {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
+    const verifyToken = crypto.randomUUID();
 
-    await User.create({ name, email, password: passwordHash });
+    await User.create({ name, email, password: passwordHash, verifyToken });
 
-    res.status(201).send({ message: 'REgistration succesful' });
+    sendEmail({
+      to: email,
+      subject: `Welcome, ${name}`,
+      html: `
+        <p>To confirm your registration, please click on the link below</p>
+        <a href="http://localhost:8080/api/auth/verify/${verifyToken}">Click Me</a>
+      `,
+      text: `
+        To confirm your registration, please click on the link below:\n
+        http://localhost:8080/api/auth/verify/${verifyToken}
+      `
+    })
+
+    res.status(201).send({ message: 'Registration succesful' });
   } catch (error) {
     next(error);
   }
@@ -33,6 +50,10 @@ async function login(req, res, next) {
       return res
         .status(401)
         .send({ message: 'Email or password is incorrect' });
+    }
+
+    if(user.verified !== true){
+      return res.status(401).send({ message: 'Please verify your email'})
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -68,8 +89,27 @@ async function logout(req, res, next) {
   }
 }
 
+async function verify(req, res, next) {
+  const { token } = req.params;
+
+  try {
+    const user = await User.findOne({ verifyToken: token }).execa();
+
+    if (user === null) {
+      return res.status(401).send({ message: "Invalid token" })
+    }
+
+    await User.findByIdAndUpdate(user._id, { verified: true, verifyToken: null })
+
+    res.send({ message: "User verified" })
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   logout,
+  verify,
 };
